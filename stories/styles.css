@@ -1,0 +1,27 @@
+/* This is the global style also applied to MoneyRepo */
+
+@import url(https://fonts.googleapis.com/css?family=Roboto+Mono:400,700|Material+Icons);
+@import url(https://unpkg.com/normalize.css);
+@import url(https://unpkg.com/@blueprintjs/core/dist/blueprint.css);
+@import url(https://unpkg.com/@blueprintjs/datetime/dist/blueprint-datetime.css);
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 1000px;
+  font-family: 'Roboto Mono', monospace;
+  box-sizing: border-box;
+  font-size: 12px;
+  user-select: none;
+}
+
+/* This is style apply specifically to React Storybook */
+body {
+  padding: 30px;
+}
+
+pre {
+  max-height: 100px;
+  overflow: auto;
+}

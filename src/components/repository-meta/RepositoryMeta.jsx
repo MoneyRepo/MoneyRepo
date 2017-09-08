@@ -6,6 +6,7 @@ import * as Styled from './RepositoryMeta.style'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
+/*eslint-disable no-unused-expressions */
 injectGlobal`
 .pt-editable-text:hover::before {
   box-shadow: none;
@@ -52,7 +53,7 @@ class RepositoryMeta extends Component {
     this.state = {
       name,
       note,
-      metaSelectorVisibility: false,
+      metaSelectorVisibility: false
     }
   }
 

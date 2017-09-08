@@ -1,5 +1,7 @@
 import { connect } from 'react-redux'
 import { firebaseConnect } from 'react-redux-firebase'
+import { getNowTime } from 'utils/get-now-time.js'
+import { TransactionType } from 'constants/data-type'
 import {
   requestDeleteAccount,
   requestUpdateAccountDetail,
@@ -92,9 +94,14 @@ class Repository extends Component {
   }
 
   getTransactionData = transactionId => {
+    const { timestamp } = getNowTime()
+    const lastTransactionType = window.localStorage.lastTransactionType
+    const type = TransactionType[lastTransactionType]
+      ? lastTransactionType
+      : 'Expense'
     let transactionData = {
-      type: 'Expense',
-      date: new Date(),
+      type,
+      date: timestamp,
       description: 'Sample transaction description',
       amount: 0,
       category: '',
@@ -111,7 +118,11 @@ class Repository extends Component {
     return transactionData
   }
 
-  handleTypeChange = () => {}
+  handleTypeChange = transactionType => {
+    if (transactionType) {
+      window.localStorage.lastTransactionType = transactionType
+    }
+  }
 
   handleAddTransaction = transactionData => {
     try {

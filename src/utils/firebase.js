@@ -9,8 +9,8 @@ import { assertParams } from 'utils/assertion'
 /**
  * Get a key for push a new data
  * https://firebase.google.com/docs/database/web/read-and-write#updating_or_deleting_data
- * @param {*firebase} firebase
- * @param {*String} path
+ * @param {Object} firebase
+ * @param {String} path
  */
 function getPushKey(firebase, path) {
   assertParams({
@@ -22,6 +22,7 @@ function getPushKey(firebase, path) {
     .child(path)
     .push().key
 }
+
 // User firebase
 export const requestUpdateUsertDetail = async (firebase, uid) => {
   assertParams({
@@ -119,10 +120,10 @@ export const requestAddNewTransaction = async (
     accountId
   })
 
-  const { date, timestamp } = getNowTime()
+  const { timestamp } = getNowTime()
 
   const EMPTY_TRANSACTION_OBJ = {
-    date,
+    date: timestamp,
     amount: 0,
     balance: 0,
     description: '',

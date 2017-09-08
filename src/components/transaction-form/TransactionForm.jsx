@@ -46,9 +46,11 @@ class TransactionForm extends Component {
 
   handleTransactionTypeChange = transactionType => {
     const { onTypeChange } = this.props
+    const { transactionData } = this.state
 
     this.setState({
       transactionData: {
+        ...transactionData,
         type: transactionType
       }
     })

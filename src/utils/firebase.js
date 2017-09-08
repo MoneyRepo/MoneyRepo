@@ -36,7 +36,38 @@ export const requestUpdateUsertDetail = async (firebase, uid) => {
     lastUpdate: timestamp
   })
 }
+
 // Account firebase
+export const requestAddNewAccount = async (firebase, uid) => {
+  assertParams({
+    firebase,
+    uid
+  })
+
+  const { timestamp } = getNowTime()
+
+  const EMPTY_ACCOUNT_OBJ = {
+    name: '',
+    note: '',
+    transactions: Object.create(null),
+    owner: uid,
+    status: true,
+    createTime: timestamp,
+    updateTime: timestamp
+  }
+
+  const accountsPath = `/accounts/${uid}`
+  const accountId = getPushKey(firebase, accountsPath)
+
+  EMPTY_ACCOUNT_OBJ.id = accountId
+
+  return firebase
+    .update(accountsPath, {
+      [accountId]: EMPTY_ACCOUNT_OBJ
+    })
+    .then(() => EMPTY_ACCOUNT_OBJ)
+}
+
 export const requestUpdateAccountDetail = async (
   firebase,
   uid,
@@ -57,27 +88,6 @@ export const requestUpdateAccountDetail = async (
   })
 }
 
-export const requestAddNewAccount = async (firebase, uid) => {
-  assertParams({
-    firebase,
-    uid
-  })
-
-  const { timestamp } = getNowTime()
-
-  const EMPTY_ACCOUNT_OBJ = {
-    name: '',
-    note: '',
-    transactions: Object.create(null),
-    owner: uid,
-    status: true,
-    createTime: timestamp,
-    updateTime: timestamp
-  }
-
-  return firebase.push(`/accounts/${uid}`, EMPTY_ACCOUNT_OBJ)
-}
-
 export const requestDeleteAccount = async (firebase, uid, accountId) => {
   await requestUpdateAccountDetail(firebase, uid, accountId, {
     status: false
@@ -85,29 +95,6 @@ export const requestDeleteAccount = async (firebase, uid, accountId) => {
 }
 
 // Transaction firebase
-export const requestUpdateTransactionDetail = async (
-  firebase,
-  uid,
-  accountId,
-  transactionId,
-  transactionDetail = {}
-) => {
-  assertParams({
-    uid,
-    firebase,
-    accountId,
-    transactionId
-  })
-  const { timestamp } = getNowTime()
-
-  await requestUpdateUsertDetail(firebase, uid)
-  await requestUpdateAccountDetail(firebase, uid, accountId, {})
-  return firebase.update(`/transactions/${uid}/${accountId}/${transactionId}`, {
-    ...transactionDetail,
-    updateTime: timestamp
-  })
-}
-
 export const requestAddNewTransaction = async (
   firebase,
   uid,
@@ -141,12 +128,39 @@ export const requestAddNewTransaction = async (
   const transactionsPath = `/transactions/${uid}/${accountId}`
   const transactionId = getPushKey(firebase, transactionsPath)
 
+  EMPTY_TRANSACTION_OBJ.id = transactionId
+
   await requestUpdateUsertDetail(firebase, uid)
   await requestUpdateAccountDetail(firebase, uid, accountId, {
     [`transactions/${transactionId}`]: true
   })
-  return firebase.update(transactionsPath, {
-    [transactionId]: EMPTY_TRANSACTION_OBJ
+  return firebase
+    .update(transactionsPath, {
+      [transactionId]: EMPTY_TRANSACTION_OBJ
+    })
+    .then(() => EMPTY_TRANSACTION_OBJ)
+}
+
+export const requestUpdateTransactionDetail = async (
+  firebase,
+  uid,
+  accountId,
+  transactionId,
+  transactionDetail = {}
+) => {
+  assertParams({
+    uid,
+    firebase,
+    accountId,
+    transactionId
+  })
+  const { timestamp } = getNowTime()
+
+  await requestUpdateUsertDetail(firebase, uid)
+  await requestUpdateAccountDetail(firebase, uid, accountId, {})
+  return firebase.update(`/transactions/${uid}/${accountId}/${transactionId}`, {
+    ...transactionDetail,
+    updateTime: timestamp
   })
 }
 

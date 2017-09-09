@@ -1,6 +1,6 @@
 import { getNowTime } from 'utils/get-now-time.js'
 import { assertParams } from 'utils/assertion'
-import { getPushKey } from 'utils/firebase-util'
+import { getPushKey, queryData } from 'utils/firebase-util'
 
 // TODO:
 // - CRUD by firebase.ref().transaction
@@ -35,6 +35,7 @@ export const requestAddNewAccount = async (firebase, uid) => {
     transactions: Object.create(null),
     owner: uid,
     status: true,
+    balance: 0,
     createTime: timestamp,
     updateTime: timestamp
   }
@@ -78,6 +79,94 @@ export const requestDeleteAccount = async (firebase, uid, accountId) => {
 }
 
 // Transaction firebase
+
+// TODO:
+// - Compute Balance From Change-Transaction
+const _handleTransactionChange = async (
+  firebase,
+  uid,
+  accountId,
+  transactionDetail
+) => {
+  assertParams({
+    uid,
+    firebase,
+    accountId,
+    transactionDetail
+  })
+  const { id } = transactionDetail
+  // const { id, date, type, amount } = transactionDetail
+
+  const path = `/transactions/${uid}/${accountId}/`
+  const queryParams = ['orderByChild=status', `equalTo=true`]
+  // const queryParams = ['orderByChild=date', `startAt=${date}`]
+
+  let transactions = await queryData(firebase, path, queryParams)
+  transactions = transactions || {}
+
+  // Correct Change-Transaction's Balance
+  // if (transactions[id]) {
+  //   const lastAmount = transactions[id].amount
+  //   const lastType = transactions[id].type
+  //   const isTypeChange = lastType === type
+  //   const balanceChange = isTypeChange
+  //     ? ~~lastAmount + ~~amount
+  //     : ~~amount - ~~lastAmount
+  //   switch (type.toLowerCase()) {
+  //     case 'expense':
+  //       transactionDetail.balance -= balanceChange
+  //       break
+  //     case 'income':
+  //       transactionDetail.balance -= balanceChange
+  //       break
+  //     default:
+  //       break
+  //   }
+  // }
+
+  transactions[id] = {
+    ...transactions[id],
+    ...transactionDetail
+  }
+
+  const transactionsArr = Object.keys(transactions).map(id => transactions[id])
+  transactionsArr.sort((a, b) => a.date - b.date)
+
+  let balance = 0
+  // let firestTransactionChange = true
+
+  transactionsArr.forEach((transaction, idx) => {
+    let { status, amount, type } = transaction
+    if (!status) {
+      return
+    }
+
+    // if (firestTransactionChange) {
+    //   firestTransactionChange = false
+    //   return (balance = transaction.balance)
+    // }
+
+    switch (type.toLowerCase()) {
+      case 'expense':
+        balance -= ~~amount
+        break
+      case 'income':
+        balance += ~~amount
+        break
+      default:
+        break
+    }
+
+    transaction.balance = balance
+  })
+
+  await requestUpdateAccountDetail(firebase, uid, accountId, { balance })
+
+  return firebase.update(`/transactions/${uid}/${accountId}/`, {
+    ...transactions
+  })
+}
+
 export const requestAddNewTransaction = async (
   firebase,
   uid,
@@ -112,58 +201,49 @@ export const requestAddNewTransaction = async (
   const transactionId = getPushKey(firebase, transactionsPath)
 
   EMPTY_TRANSACTION_OBJ.id = transactionId
-
   await requestUpdateUsertDetail(firebase, uid)
   await requestUpdateAccountDetail(firebase, uid, accountId, {
     [`transactions/${transactionId}`]: true
   })
-  return firebase
-    .update(transactionsPath, {
-      [transactionId]: EMPTY_TRANSACTION_OBJ
-    })
-    .then(() => EMPTY_TRANSACTION_OBJ)
+  return _handleTransactionChange(
+    firebase,
+    uid,
+    accountId,
+    EMPTY_TRANSACTION_OBJ
+  ).then(() => EMPTY_TRANSACTION_OBJ)
 }
 
 export const requestUpdateTransactionDetail = async (
   firebase,
   uid,
   accountId,
-  transactionId,
   transactionDetail = {}
 ) => {
   assertParams({
     uid,
     firebase,
-    accountId,
-    transactionId
+    accountId
   })
   const { timestamp } = getNowTime()
+  transactionDetail.updateTime = timestamp
 
   await requestUpdateUsertDetail(firebase, uid)
   await requestUpdateAccountDetail(firebase, uid, accountId, {})
-  return firebase.update(`/transactions/${uid}/${accountId}/${transactionId}`, {
-    ...transactionDetail,
-    updateTime: timestamp
-  })
+  return _handleTransactionChange(firebase, uid, accountId, transactionDetail)
 }
 
 export const requestDeleteTransaction = async (
   firebase,
   uid,
   accountId,
-  transactionId
+  transactionDetail = {}
 ) => {
+  const transactionId = transactionDetail.id
   await requestUpdateUsertDetail(firebase, uid)
   await requestUpdateAccountDetail(firebase, uid, accountId, {
     [`transactions/${transactionId}`]: false
   })
-  return requestUpdateTransactionDetail(
-    firebase,
-    uid,
-    accountId,
-    transactionId,
-    {
-      status: false
-    }
-  )
+  transactionDetail.status = false
+
+  return _handleTransactionChange(firebase, uid, accountId, transactionDetail)
 }

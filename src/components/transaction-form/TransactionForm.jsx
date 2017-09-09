@@ -38,7 +38,7 @@ class TransactionForm extends Component {
       this.setState({
         transactionData: {
           ...transactionData,
-          date
+          date: date.getTime()
         }
       })
     }

@@ -53,7 +53,7 @@ export function queryData(firebase, path, queryParams) {
   if (queryParams && isArray(queryParams)) {
     query = applyParamsToQuery(queryParams, query)
   }
-  return query.once('value')
+  return query.once('value').then(snapshot => snapshot.val())
 }
 
 /**

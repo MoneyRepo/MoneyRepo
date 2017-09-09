@@ -193,22 +193,6 @@ class Repository extends Component {
     })
   }
 
-  handleTest = () => {
-    const { firebase, uid, repositoryId } = this.props
-    const path = `/transactions/${uid}/${repositoryId}`
-    console.log(1)
-    firebase
-      .ref()
-      .child(path)
-      .orderByChild('status')
-      .equalTo(true)
-      .once('value')
-      .then(snapshot => {
-        console.log(snapshot.val())
-      })
-    console.log(2)
-  }
-
   render() {
     const {
       repositoryId,
@@ -279,9 +263,7 @@ class Repository extends Component {
               )
             }}
           />
-          <div className="test" onClick={this.handleTest}>
-            测试
-          </div>
+
           {!transactionElmsArr.length &&
           !isEditingNewRespository && (
             <NonIdealState

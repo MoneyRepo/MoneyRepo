@@ -1,27 +1,10 @@
 import { getNowTime } from 'utils/get-now-time.js'
 import { assertParams } from 'utils/assertion'
+import { getPushKey } from 'utils/firebase-util'
 
 // TODO:
 // - CRUD by firebase.ref().transaction
 // - https://firebase.google.com/docs/reference/js/firebase.database.Reference#transaction
-
-// Common
-/**
- * Get a key for push a new data
- * https://firebase.google.com/docs/database/web/read-and-write#updating_or_deleting_data
- * @param {Object} firebase
- * @param {String} path
- */
-function getPushKey(firebase, path) {
-  assertParams({
-    firebase,
-    path
-  })
-  return firebase
-    .ref()
-    .child(path)
-    .push().key
-}
 
 // User firebase
 export const requestUpdateUsertDetail = async (firebase, uid) => {

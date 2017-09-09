@@ -58,6 +58,7 @@ export function queryData(firebase, path, queryParams) {
 
 /**
  * Modify query to include methods based on query parameters (such as orderByChild)
+ * https://github.com/prescottprue/react-redux-firebase/blob/7b8739a2894964ec74a9d4ba82a5aa39d1f0fe08/src/utils/query.js#L120
  * @param {Array} queryParams - Array of query parameters to apply to query
  * @param {Object} query - Query object on which to apply query parameters
  * @return {FirebaseQuery}

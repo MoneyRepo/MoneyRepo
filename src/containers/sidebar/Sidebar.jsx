@@ -29,7 +29,12 @@ const mapStateToProps = state => {
 @firebaseConnect((props, firebase) => {
   //FIXME: Seems there is a way to pass `uid` to `firebaseConnect` here
   const uid = firebase._.authUid
-  return [{ path: `/accounts/${uid}`, queryParams: ['orderByChild=status', 'equalTo=true'] }]
+  return [
+    {
+      path: `/accounts/${uid}`,
+      queryParams: ['orderByChild=status', 'equalTo=true']
+    }
+  ]
 })
 @connect(mapStateToProps)
 export default class Sidebar extends Component {
@@ -49,10 +54,10 @@ export default class Sidebar extends Component {
     const { firebase, auth: { uid }, history } = this.props
 
     return requestAddNewAccount(firebase, uid)
-      .then(({ key }) => {
+      .then(({ id }) => {
         callback(false)
-        this.updateSelectedId(key)
-        history.push(`/repository/${key}?status=new`)
+        this.updateSelectedId(id)
+        history.push(`/repository/${id}?status=new`)
       })
       .catch(err => {
         // IMPROVEMENT: Better error handling

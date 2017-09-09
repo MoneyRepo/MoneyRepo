@@ -3,6 +3,7 @@ import App from './App'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
+/*eslint-disable no-unused-expressions */
 injectGlobal`
 @import url(https://fonts.googleapis.com/css?family=Roboto+Mono:400,700|Material+Icons);
 

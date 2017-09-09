@@ -1,6 +1,7 @@
 import { DateTimePicker } from '@blueprintjs/datetime'
 import { injectGlobal } from 'styled-components'
 
+/*eslint-disable no-unused-expressions */
 injectGlobal`
 .pt-dark .pt-datetimepicker {
   background-color: RGBA(44, 50, 58, 1.00);

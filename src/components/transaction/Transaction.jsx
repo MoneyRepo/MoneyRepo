@@ -4,11 +4,10 @@ import moment from 'moment'
 // import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import TransactionIndicator from '../transaction-indicator/TransactionIndicator'
-import { Hotkey, Hotkeys, HotkeysTarget } from "@blueprintjs/core"
+import { Hotkey, Hotkeys, HotkeysTarget } from '@blueprintjs/core'
 
 // const DOUBLE_CLICK_DELAY = 200
 
-@HotkeysTarget
 class Transaction extends Component {
   handleClick = () => {
     const { handleClick, transactionId } = this.props
@@ -80,4 +79,4 @@ class Transaction extends Component {
   }
 }
 
-export default Transaction
+export default HotkeysTarget(Transaction)

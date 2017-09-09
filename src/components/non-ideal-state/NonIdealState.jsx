@@ -1,6 +1,7 @@
 import { NonIdealState } from '@blueprintjs/core'
 import { injectGlobal } from 'styled-components'
 
+/*eslint-disable no-unused-expressions */
 injectGlobal`
 .pt-non-ideal-state-title,
 .pt-non-ideal-state-description {

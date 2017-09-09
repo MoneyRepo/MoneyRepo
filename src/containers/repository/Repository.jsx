@@ -1,5 +1,7 @@
 import { connect } from 'react-redux'
 import { firebaseConnect } from 'react-redux-firebase'
+import { getNowTime } from 'utils/get-now-time.js'
+import { TransactionType } from 'constants/data-type'
 import {
   requestDeleteAccount,
   requestUpdateAccountDetail,
@@ -92,9 +94,14 @@ class Repository extends Component {
   }
 
   getTransactionData = transactionId => {
+    const { timestamp } = getNowTime()
+    const lastTransactionType = window.localStorage.lastTransactionType
+    const type = TransactionType[lastTransactionType]
+      ? lastTransactionType
+      : 'Expense'
     let transactionData = {
-      type: 'Expense',
-      date: new Date(),
+      type,
+      date: timestamp,
       description: 'Sample transaction description',
       amount: 0,
       category: '',
@@ -111,7 +118,11 @@ class Repository extends Component {
     return transactionData
   }
 
-  handleTypeChange = () => {}
+  handleTypeChange = transactionType => {
+    if (transactionType) {
+      window.localStorage.lastTransactionType = transactionType
+    }
+  }
 
   handleAddTransaction = transactionData => {
     try {
@@ -128,14 +139,11 @@ class Repository extends Component {
 
   handleUpdateTransaction = async (transactionData, transactionId) => {
     try {
-      const { firebase, uid, repositoryId } = this.props
-      await requestUpdateTransactionDetail(
-        firebase,
-        uid,
-        repositoryId,
-        transactionId,
-        transactionData
-      )
+      const { firebase, uid, repositoryId, transactionsDetail } = this.props
+      await requestUpdateTransactionDetail(firebase, uid, repositoryId, {
+        ...transactionsDetail[transactionId],
+        ...transactionData
+      })
       this.setState({
         activeTransactionId: null,
         isEditingNewRespository: false
@@ -148,8 +156,13 @@ class Repository extends Component {
 
   handleDeleteTransaction = async transactionId => {
     try {
-      const { firebase, uid, repositoryId } = this.props
-      await requestDeleteTransaction(firebase, uid, repositoryId, transactionId)
+      const { firebase, uid, repositoryId, transactionsDetail } = this.props
+      await requestDeleteTransaction(
+        firebase,
+        uid,
+        repositoryId,
+        transactionsDetail[transactionId]
+      )
       this.setState({
         focusTransactionId: null,
         isEditingNewRespository: false
@@ -197,20 +210,26 @@ class Repository extends Component {
       focusTransactionId
     } = this.state
 
+    const transactionsArr = Object.keys(transactionsDetail).map(
+      id => transactionsDetail[id]
+    )
+    transactionsArr.sort((a, b) => a.date - b.date)
+
     const transactionElmsArr = []
-    Object.keys(transactionsDetail).forEach(transactionId => {
-      const transactionData = transactionsDetail[transactionId]
+
+    transactionsArr.forEach(transactionData => {
+      const { id } = transactionData
       if (!transactionData.status) {
         return
       }
       let transactionElm
-      const isActive = activeTransactionId === transactionId
-      const isFocus = focusTransactionId === transactionId
+      const isActive = activeTransactionId === id
+      const isFocus = focusTransactionId === id
       if (isActive) {
         transactionElm = (
           <TransactionForm
-            key={transactionId}
-            transactionId={transactionId}
+            key={id}
+            transactionId={id}
             outsideClickIgnoreClass="respository-action"
             onTypeChange={this.handleTypeChange}
             transactionData={transactionData}
@@ -223,8 +242,8 @@ class Repository extends Component {
             active={isFocus}
             handleClick={this.handleTransactionClick}
             handleDoubleClick={this.handleTransactionDoubleClick}
-            key={transactionId}
-            transactionId={transactionId}
+            key={id}
+            transactionId={id}
             transactionData={transactionData}
             handleDeleteTransaction={this.handleDeleteTransaction}
           />

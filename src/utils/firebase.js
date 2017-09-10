@@ -115,12 +115,14 @@ const _handleTransactionChange = async (
       return
     }
 
+    amount = Number(amount)
+
     switch (type.toLowerCase()) {
       case 'expense':
-        balance -= Number(amount)
+        balance -= amount
         break
       case 'income':
-        balance += Number(amount)
+        balance += amount
         break
       default:
         break

@@ -79,9 +79,6 @@ export const requestDeleteAccount = async (firebase, uid, accountId) => {
 }
 
 // Transaction firebase
-
-// TODO:
-// - Compute Balance From Change-Transaction
 const _handleTransactionChange = async (
   firebase,
   uid,
@@ -95,34 +92,12 @@ const _handleTransactionChange = async (
     transactionDetail
   })
   const { id } = transactionDetail
-  // const { id, date, type, amount } = transactionDetail
 
   const path = `/transactions/${uid}/${accountId}/`
   const queryParams = ['orderByChild=status', `equalTo=true`]
-  // const queryParams = ['orderByChild=date', `startAt=${date}`]
 
   let transactions = await queryData(firebase, path, queryParams)
   transactions = transactions || {}
-
-  // Correct Change-Transaction's Balance
-  // if (transactions[id]) {
-  //   const lastAmount = transactions[id].amount
-  //   const lastType = transactions[id].type
-  //   const isTypeChange = lastType === type
-  //   const balanceChange = isTypeChange
-  //     ? ~~lastAmount + ~~amount
-  //     : ~~amount - ~~lastAmount
-  //   switch (type.toLowerCase()) {
-  //     case 'expense':
-  //       transactionDetail.balance -= balanceChange
-  //       break
-  //     case 'income':
-  //       transactionDetail.balance -= balanceChange
-  //       break
-  //     default:
-  //       break
-  //   }
-  // }
 
   transactions[id] = {
     ...transactions[id],
@@ -133,7 +108,6 @@ const _handleTransactionChange = async (
   transactionsArr.sort((a, b) => a.date - b.date)
 
   let balance = 0
-  // let firestTransactionChange = true
 
   transactionsArr.forEach((transaction, idx) => {
     let { status, amount, type } = transaction
@@ -141,17 +115,14 @@ const _handleTransactionChange = async (
       return
     }
 
-    // if (firestTransactionChange) {
-    //   firestTransactionChange = false
-    //   return (balance = transaction.balance)
-    // }
+    amount = Number(amount)
 
     switch (type.toLowerCase()) {
       case 'expense':
-        balance -= ~~amount
+        balance -= amount
         break
       case 'income':
-        balance += ~~amount
+        balance += amount
         break
       default:
         break

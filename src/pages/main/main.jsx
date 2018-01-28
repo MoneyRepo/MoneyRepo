@@ -7,6 +7,7 @@ import LogoutMask from '../../components//logout-mask//LogoutMask'
 import React, { Component } from 'react'
 import Repository from '../../containers/repository/Repository'
 import Sidebar from '../../containers/sidebar/Sidebar'
+import Dashboard from '../../containers/dashboard/Dashboard'
 
 const mapStateToProps = state => {
   const { firebase: { auth } } = state
@@ -30,7 +31,7 @@ class Main extends Component {
       this.props.firebase
         // currently only GitHub login is supported
         .login({ provider: 'github' })
-        .then(() => {})
+        .then(() => { })
         .catch(err => {
           //IMPROVEMENT: Better error handling
           console.error(err)
@@ -95,6 +96,7 @@ class Main extends Component {
 
         <Sidebar updateSettingVisibility={this.updateSettingVisibility} />
         <Route exact path="/repository/:repositoryId" component={Repository} />
+        <Route exact path="/dashboard" component={Dashboard} />
       </Styled.MainLayout>
     )
   }
